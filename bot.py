@@ -7,6 +7,7 @@ from pyrogram import Client, filters, idle
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait
 from config import *
+from config import GROUP_LINK, FORCE_CHANNEL
 
 app = Client(
     "premium_storage_bot",
@@ -74,6 +75,9 @@ def channel_button():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("📢 Channel Bot", url=GROUP_LINK)]
     ])
+    # ================= CONFIG =================
+GROUP_LINK = "https://t.me/+LhRlOVJXSdRhMjRl"
+print("GROUP_LINK =", GROUP_LINK)
 
 # ================= SAFE SEND =================
 
