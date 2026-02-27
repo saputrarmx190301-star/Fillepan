@@ -46,7 +46,19 @@ async def create_tables():
         code TEXT UNIQUE
     );
     """)
+# =====================================
+# CONFIG WAJIB - JANGAN HAPUS
+# =====================================
 
+import os
+
+# kalau pakai ENV hosting
+GROUP_LINK = os.getenv("GROUP_LINK", "https://t.me/bociku")
+
+# kalau tidak pakai ENV, bisa pakai ini saja:
+# GROUP_LINK = "https://t.me/bociku"
+
+FORCE_CHANNEL = int(os.getenv("FORCE_CHANNEL", "-1003707435475"))
 # ================= UTIL =================
 
 def generate_code():
