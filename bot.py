@@ -4,6 +4,7 @@ import random
 import string
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.enums import ChatMemberStatus
 
 # ================= CONFIG =================
 API_ID = int(os.getenv("API_ID"))
@@ -42,7 +43,11 @@ async def check_join(client, user_id):
         return True
     try:
         member = await client.get_chat_member(FORCE_GROUP, user_id)
-        return member.status in ["member", "administrator", "creator"]
+        return member.status in [
+            ChatMemberStatus.MEMBER,
+            ChatMemberStatus.ADMINISTRATOR,
+            ChatMemberStatus.OWNER
+        ]
     except:
         return False
 
