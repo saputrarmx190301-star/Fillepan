@@ -6,14 +6,19 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # ================= CONFIG =================
-API_ID = int(os.environ.get("API_ID"))
-API_HASH = os.environ.get("API_HASH")
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-STORAGE_CHANNEL = int(os.environ.get("STORAGE_CHANNEL"))
-ADMIN_ID = int(os.environ.get("ADMIN_ID"))
+API_ID = int(os.getenv("API_ID"))
+API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+STORAGE_CHANNEL = int(os.getenv("STORAGE_CHANNEL"))
+ADMIN_ID = int(os.getenv("ADMIN_ID"))
 FORCE_GROUP = os.getenv("FORCE_GROUP")
 
-app = Client("pro_file_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+app = Client(
+    "pro_file_bot",
+    api_id=API_ID,
+    api_hash=API_HASH,
+    bot_token=BOT_TOKEN
+)
 
 # ================= DATABASE =================
 conn = sqlite3.connect("database.db", check_same_thread=False)
@@ -31,6 +36,7 @@ broadcast_mode = False
 def generate_code(length=10):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
+
 async def check_join(client, user_id):
     if not FORCE_GROUP:
         return True
@@ -39,14 +45,23 @@ async def check_join(client, user_id):
         return member.status in ["member", "administrator", "creator"]
     except:
         return False
-        
-        # ================= JOIN BUTTON =================
+
+
+# ================= JOIN BUTTON =================
 def join_button():
     if not FORCE_GROUP:
         return None
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("🔔 Join Telegram", url=f"https://t.me/{FORCE_GROUP.replace('@','')}")]
-    ])
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(
+                    "🔔 Join Telegram",
+                    url=f"https://t.me/{FORCE_GROUP.replace('@','')}"
+                )
+            ]
+        ]
+    )
+
 
 # ================= START =================
 @app.on_message(filters.command("start"))
@@ -58,15 +73,28 @@ async def start(client, message):
 
     args = message.command
 
+    # Jika buka link dengan code
     if len(args) > 1:
         code = args[1]
 
         joined = await check_join(client, user_id)
         if not joined:
-            btn = InlineKeyboardMarkup([
-                [InlineKeyboardButton("🔔 Join Group", url=f"https://t.me/{FORCE_GROUP.replace('@','')}")],
-                [InlineKeyboardButton("🔄 Check Again", url=f"https://t.me/{(await client.get_me()).username}?start={code}")]
-            ])
+            btn = InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            "🔔 Join Group",
+                            url=f"https://t.me/{FORCE_GROUP.replace('@','')}"
+                        )
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            "🔄 Check Again",
+                            url=f"https://t.me/{(await client.get_me()).username}?start={code}"
+                        )
+                    ]
+                ]
+            )
             return await message.reply("⚠️ Join group dulu!", reply_markup=btn)
 
         cursor.execute("SELECT file_ids FROM files WHERE code=?", (code,))
@@ -87,12 +115,17 @@ async def start(client, message):
             )
 
         await message.reply(
-    "✅ Selesai!",
-    reply_markup=join_button()
-)
-return
+            "✅ Selesai!",
+            reply_markup=join_button()
+        )
+        return
 
-    await message.reply("👋 Kirim file lalu tekan /create untuk membuat link.")
+    # Start biasa
+    await message.reply(
+        "👋 Kirim file lalu tekan /create untuk membuat link.",
+        reply_markup=join_button()
+    )
+
 
 # ================= HANDLE FILE =================
 @app.on_message(filters.private & filters.media)
@@ -110,9 +143,11 @@ async def handle_files(client, message):
     user_files[user_id].append(str(forwarded.id))
 
     await message.reply(
-    "👋 Kirim file lalu tekan /create untuk membuat link.",
-    reply_markup=join_button()
+        "✅ File tersimpan.\nKetik /create untuk membuat link.",
+        reply_markup=join_button()
     )
+
+
 # ================= CREATE LINK =================
 @app.on_message(filters.command("create"))
 async def create_link(client, message):
@@ -132,14 +167,17 @@ async def create_link(client, message):
     del user_files[user_id]
 
     await message.reply(
-        f"✅ Link berhasil dibuat!\n\n🔗 {link}\n\n📌 Code:\n{code}"
+        f"✅ Link berhasil dibuat!\n\n🔗 {link}\n\n📌 Code:\n{code}",
+        reply_markup=join_button()
     )
 
+
 # ================= MANUAL CODE =================
-@app.on_message(filters.private & filters.text & ~filters.command(["start","create","broadcast"]))
+@app.on_message(filters.private & filters.text & ~filters.command(["start", "create", "broadcast"]))
 async def manual_code(client, message):
     global broadcast_mode
 
+    # Mode Broadcast
     if message.from_user.id == ADMIN_ID and broadcast_mode:
         broadcast_mode = False
         cursor.execute("SELECT user_id FROM users")
@@ -155,6 +193,7 @@ async def manual_code(client, message):
 
         return await message.reply(f"✅ Broadcast terkirim ke {sent} user.")
 
+    # Mode Ambil File via Code
     code = message.text.strip()
 
     cursor.execute("SELECT file_ids FROM files WHERE code=?", (code,))
@@ -166,22 +205,25 @@ async def manual_code(client, message):
     file_ids = data[0].split(",")
 
     for msg_id in file_ids:
-    await client.copy_message(
-        chat_id=message.from_user.id,
-        from_chat_id=STORAGE_CHANNEL,
-        message_id=int(msg_id)
+        await client.copy_message(
+            chat_id=message.from_user.id,
+            from_chat_id=STORAGE_CHANNEL,
+            message_id=int(msg_id)
+        )
+
+    await message.reply(
+        "✅ Semua file berhasil dikirim.",
+        reply_markup=join_button()
     )
 
-await message.reply(
-    "✅ Semua file berhasil dikirim.",
-    reply_markup=join_button()
-                )
+
 # ================= BROADCAST =================
 @app.on_message(filters.command("broadcast") & filters.user(ADMIN_ID))
 async def broadcast(client, message):
     global broadcast_mode
     broadcast_mode = True
     await message.reply("📢 Kirim pesan yang ingin dibroadcast.")
+
 
 # ================= RUN =================
 app.run()
