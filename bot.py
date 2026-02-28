@@ -9,7 +9,6 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 API_ID = int(os.environ.get("API_ID"))
 API_HASH = os.environ.get("API_HASH")
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
-FORCE_GROUP = os.environ.get("FORCE_GROUP")
 STORAGE_CHANNEL = int(os.environ.get("STORAGE_CHANNEL"))
 ADMIN_ID = int(os.environ.get("ADMIN_ID"))
 FORCE_GROUP = os.getenv("FORCE_GROUP")
@@ -40,6 +39,7 @@ async def check_join(client, user_id):
         return member.status in ["member", "administrator", "creator"]
     except:
         return False
+        
         # ================= JOIN BUTTON =================
 def join_button():
     if not FORCE_GROUP:
@@ -89,12 +89,8 @@ async def start(client, message):
         await message.reply(
     "✅ Selesai!",
     reply_markup=join_button()
-        )
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("🔔 Join Group", url=f"https://t.me/{FORCE_GROUP.replace('@','')}")]
-            ])
-        )
-        return
+)
+return
 
     await message.reply("👋 Kirim file lalu tekan /create untuk membuat link.")
 
@@ -170,15 +166,16 @@ async def manual_code(client, message):
     file_ids = data[0].split(",")
 
     for msg_id in file_ids:
-        await client.copy_message(
-            chat_id=message.from_user.id,
-            from_chat_id=STORAGE_CHANNEL,
-            message_id=int(msg_id)
-        )
+    await client.copy_message(
+        chat_id=message.from_user.id,
+        from_chat_id=STORAGE_CHANNEL,
+        message_id=int(msg_id)
+    )
+
 await message.reply(
     "✅ Semua file berhasil dikirim.",
     reply_markup=join_button()
-)
+                )
 # ================= BROADCAST =================
 @app.on_message(filters.command("broadcast") & filters.user(ADMIN_ID))
 async def broadcast(client, message):
