@@ -89,19 +89,21 @@ async def start(client, message):
     await message.reply("👋 Kirim file lalu tekan /create untuk membuat link.")
 
 # ================= HANDLE FILE =================
-@app.on_message(filters.private & (filters.document | filters.video | filters.audio | filters.photo))
+@app.on_message(filters.private & filters.media)
 async def handle_files(client, message):
     user_id = message.from_user.id
 
-    forwarded = await message.forward(STORAGE_CHANNEL)
+    try:
+        forwarded = await message.forward(STORAGE_CHANNEL)
+    except Exception as e:
+        return await message.reply(f"❌ Gagal upload:\n{e}")
 
     if user_id not in user_files:
         user_files[user_id] = []
 
     user_files[user_id].append(str(forwarded.id))
 
-    await message.reply("✅ File ditambahkan. Kirim lagi atau tekan /create")
-
+    await message.reply("✅ File berhasil disimpan.\nKirim lagi atau tekan /create")
 # ================= CREATE LINK =================
 @app.on_message(filters.command("create"))
 async def create_link(client, message):
