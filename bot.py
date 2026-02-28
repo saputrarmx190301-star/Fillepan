@@ -12,6 +12,7 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN")
 FORCE_GROUP = os.environ.get("FORCE_GROUP")
 STORAGE_CHANNEL = int(os.environ.get("STORAGE_CHANNEL"))
 ADMIN_ID = int(os.environ.get("ADMIN_ID"))
+FORCE_GROUP = os.getenv("FORCE_GROUP")
 
 app = Client("pro_file_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
