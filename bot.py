@@ -39,6 +39,13 @@ async def check_join(client, user_id):
         return member.status in ["member", "administrator", "creator"]
     except:
         return False
+        # ================= JOIN BUTTON =================
+def join_button():
+    if not FORCE_GROUP:
+        return None
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("🔔 Join Telegram", url=f"https://t.me/{FORCE_GROUP.replace('@','')}")]
+    ])
 
 # ================= START =================
 @app.on_message(filters.command("start"))
@@ -79,7 +86,9 @@ async def start(client, message):
             )
 
         await message.reply(
-            "✅ Selesai!",
+    "✅ Selesai!",
+    reply_markup=join_button()
+        )
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("🔔 Join Group", url=f"https://t.me/{FORCE_GROUP.replace('@','')}")]
             ])
@@ -103,7 +112,10 @@ async def handle_files(client, message):
 
     user_files[user_id].append(str(forwarded.id))
 
-    await message.reply("✅ File berhasil disimpan.\nKirim lagi atau tekan /create")
+    await message.reply(
+    "👋 Kirim file lalu tekan /create untuk membuat link.",
+    reply_markup=join_button()
+    )
 # ================= CREATE LINK =================
 @app.on_message(filters.command("create"))
 async def create_link(client, message):
@@ -162,7 +174,10 @@ async def manual_code(client, message):
             from_chat_id=STORAGE_CHANNEL,
             message_id=int(msg_id)
         )
-
+await message.reply(
+    "✅ Semua file berhasil dikirim.",
+    reply_markup=join_button()
+)
 # ================= BROADCAST =================
 @app.on_message(filters.command("broadcast") & filters.user(ADMIN_ID))
 async def broadcast(client, message):
