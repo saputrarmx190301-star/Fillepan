@@ -10,7 +10,13 @@ from pyrogram.enums import ChatMemberStatus
 API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-STORAGE_CHANNEL = os.getenv("STORAGE_CHANNEL")
+
+raw_storage = os.getenv("STORAGE_CHANNEL")
+if raw_storage.startswith("-100"):
+    STORAGE_CHANNEL = int(raw_storage)
+else:
+    STORAGE_CHANNEL = raw_storage
+
 FORCE_GROUP = os.getenv("FORCE_GROUP")
 ADMIN_ID = int(os.getenv("ADMIN_ID"))
 
